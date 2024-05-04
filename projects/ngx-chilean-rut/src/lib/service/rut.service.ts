@@ -21,6 +21,7 @@ export class RutService {
    * @param rut
    */
   public  rutValidate(rut: string) {
+   if (!rut || rut == null) return '';
     const _rut: string = this.rutClean(rut);
     if(_rut.length < 6 ) return false;
     let rutDigits: number = parseInt(_rut.slice(0, -1), 10);
@@ -41,6 +42,7 @@ export class RutService {
    * @returns {string}
    */
   public  rutFormat(rut: string): string {
+    if (!rut || rut == null) return '';
     const _rut: string = this.rutClean(rut);
     if (_rut.length <= 1) {
       return _rut;

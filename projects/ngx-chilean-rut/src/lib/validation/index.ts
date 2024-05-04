@@ -1,6 +1,6 @@
 import {rutValid} from "./rut.reactive-form.validation";
 
 
-export const RutValidators = {
+export const Rut = {
   default: rutValid
 };
