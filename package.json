@@ -1,6 +1,6 @@
 {
   "name": "ngx-chilean-rut",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "pack": "cd dist/ngx-chilean-rut && npm pack",
-    "publish": "npm publish"
+    "publish": "cd dist/ngx-chilean-rut && npm publish"
   },
   "private": false,
   "dependencies": {
@@ -37,5 +37,18 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "ng-packagr": "^17.3.0",
     "typescript": "~5.4.2"
-  }
+  },
+  "author": {
+    "name": "Juan Pablo Duran Herrera",
+    "email": "jpduranhe@gmail.com",
+    "url": "https://www.jpduranhe.cl"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jpduranhe/ngx-chilean-rut"
+  },
+  "bugs": {
+    "url": "https://github.com/jpduranhe/ngx-chilean-rut/issues"
+  },
+  "license": "MIT"
 }

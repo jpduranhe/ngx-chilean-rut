@@ -1,27 +1,36 @@
 # NgxRut
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.2.
+Esta librería permite validar en ReactiveForm y formatear RUT chilenos en Angular.
 
-## Development server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
 
-## Code scaffolding
+##Instalacion
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+```typescript
+    npm install ngx-chilean-rut;
+```
 
-## Build
+## Uso
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
-## Running unit tests
+```typescript
+    import { Component } from '@angular/core';
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+    @Component({
+        selector: 'app-root',
+        standalone: true,
+        imports: [RutPipe, RutDirective],
+        templateUrl: './app.component.html',
+        styleUrls: ['./app.component.css']
+      template: `
+        <input type="text" rut [(ngModel)]="textRut" />
+        <h1>  {{textRut | rut}}</h1>
+      `
+    })
+    export class AppComponent {
+        textRut: string;
+    }
+```
 
-## Running end-to-end tests
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+Ejemplo de uso [Link](https://stackblitz.com/~/github.com/jpduranhe/test-ngx-chilean-rut)
