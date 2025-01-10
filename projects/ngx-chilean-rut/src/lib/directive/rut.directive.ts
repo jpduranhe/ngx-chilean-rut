@@ -17,7 +17,9 @@ export class RutDirective {
   public onBlur() {
     this.elem.nativeElement.value = this.rutService.rutFormat(this.elem.nativeElement.value) || '';
   }
-
+  @HostListener('input') logChange() {
+    this.elem.nativeElement.value = this.rutService.rutFormat(this.elem.nativeElement.value) || '';
+  }
 
 
 
