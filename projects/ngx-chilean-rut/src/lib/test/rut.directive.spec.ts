@@ -5,11 +5,10 @@ import { RutDirective } from '../directive/rut.directive';
 import { RutService } from '../service/rut.service';
 
 @Component({
-  template: `<input type="text" rut>`,
-  standalone: true,
-  imports: [
-    RutDirective
-  ]
+    template: `<input type="text" rut>`,
+    imports: [
+        RutDirective
+    ]
 })
  class TestComponent {}
 

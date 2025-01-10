@@ -2,8 +2,8 @@
   "name": "ngx-chilean-rut",
   "version": "0.0.9",
   "peerDependencies": {
-    "@angular/common": "^18.0.5",
-    "@angular/core": "^18.0.5"
+    "@angular/common": "^19.0.0",
+    "@angular/core": "^19.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
