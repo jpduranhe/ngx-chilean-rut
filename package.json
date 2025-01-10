@@ -8,7 +8,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "pack": "cd dist/ngx-chilean-rut && npm pack",
-    "publish": "cd dist/ngx-chilean-rut && npm publish"
+    "publish": "cd dist/ngx-chilean-rut && npm publish",
+    "fullbuild": "npm run build && npm run pack && npm run publish"
   },
   "private": false,
   "dependencies": {
