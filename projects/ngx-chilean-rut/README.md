@@ -11,7 +11,13 @@ Esta librería permite validar en ReactiveForm y formatear RUT chilenos en Angul
 ```
 
 ## Uso
-
+```typescript
+export const appConfig: ApplicationConfig = {
+  providers: [
+    ...
+    provideNgxRutProvider(),
+  ]};
+```
 
 ```typescript
     import { Component } from '@angular/core';
@@ -25,7 +31,7 @@ import {
 } from '@angular/forms';
 import 'zone.js';
 
-import { Rut, RutDirective, RutPipe } from 'ngx-chilean-rut';
+import { RutValidator, RutDirective, RutPipe } from 'ngx-chilean-rut';
 
     @Component({
   selector: 'app-root',
@@ -70,10 +76,10 @@ import { Rut, RutDirective, RutPipe } from 'ngx-chilean-rut';
 export class App {
   public formulario: FormGroup;
   public rut2 = '111111111';
-  //public rurService = inject(RutService);
+  private rutValidator= inject(RutValidator);
   constructor(private formBuilder: FormBuilder) {
     this.formulario = this.formBuilder.group({
-      rut: ['', [Validators.required, Rut.default()]],
+      rut: ['', [Validators.required, this.rutValidator.validate]],
     });
   }
 }

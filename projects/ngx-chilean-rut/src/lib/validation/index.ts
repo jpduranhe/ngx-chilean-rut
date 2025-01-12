@@ -1,6 +1,1 @@
-import {rutValid} from "./rut.reactive-form.validation";
-
-
-export const Rut = {
-  default: rutValid
-};
+export * from './rut.reactive-form.validation';
