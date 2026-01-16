@@ -2,6 +2,11 @@ import { TestBed } from '@angular/core/testing';
 
 import { RutService } from '../service/rut.service';
 
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting,
+} from '@angular/platform-browser-dynamic/testing';
+
 describe('RutService', () => {
   let service: RutService;
 

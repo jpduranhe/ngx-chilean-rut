@@ -15,7 +15,7 @@ Esta librería permite validar en ReactiveForm y formatear RUT chilenos en Angul
 export const appConfig: ApplicationConfig = {
   providers: [
     ...
-    provideNgxRutProvider(),
+    provideNgxRut(),
   ]};
 ```
 

@@ -3,7 +3,7 @@ import { RutDirective } from "../directive/rut.directive";
 import { RutService } from "../service/rut.service";
 import { RutValidator } from "../validation/rut.reactive-form.validation";
 
-export  function provideNgxRutProvider(): EnvironmentProviders {
+export function provideNgxRut(): EnvironmentProviders {
   return makeEnvironmentProviders([
 
     {
