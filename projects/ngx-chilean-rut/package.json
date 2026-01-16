@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jpduranhe/ngx-chilean-rut"
+    "url": "git+https://github.com/jpduranhe/ngx-chilean-rut.git"
   },
   "bugs": {
     "url": "https://github.com/jpduranhe/ngx-chilean-rut/issues"
