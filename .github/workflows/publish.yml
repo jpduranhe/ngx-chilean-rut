@@ -10,7 +10,7 @@ on:
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       id-token: write
@@ -35,7 +35,11 @@ jobs:
       - name: Build Library
         run: npm run build
 
+      - name: Authenticate with NPM
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN || secrets.NPM_SECRET_TOKEN }}" > ~/.npmrc
+
       - name: Publish
-        run: cd dist/ngx-chilean-rut && npm publish --access public
+        run: npm publish --access public
+        working-directory: dist/ngx-chilean-rut
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN || secrets.NPM_SECRET_TOKEN }}
