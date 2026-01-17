@@ -6,7 +6,6 @@ on:
   push:
     tags:
       - 'v*'
-      - 'Linux'
   workflow_dispatch:
 
 jobs:
