@@ -91,8 +91,22 @@ jobs:
       # setup-node ya dejo el .npmrc apuntando al registry con el placeholder
       # de NODE_AUTH_TOKEN, asi que no hay que escribirlo a mano: hacerlo con
       # un token vacio es justamente lo que rompe el OIDC.
+      # Republicar una version ya existente es un no-op, no un error: el
+      # objetivo del workflow es "esta version esta en npm", y si ya lo esta,
+      # se cumplio. npm devuelve E403 en ese caso, que es indistinguible de un
+      # problema de permisos, asi que se comprueba antes contra el registro.
       - name: Publish
-        run: npm publish --access public
         working-directory: dist/ngx-chilean-rut
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+
+          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+            echo "::notice::$NAME@$VERSION ya esta publicada en npm. Nada que hacer."
+            exit 0
+          fi
+
+          echo "Publicando $NAME@$VERSION..."
+          npm publish --access public
