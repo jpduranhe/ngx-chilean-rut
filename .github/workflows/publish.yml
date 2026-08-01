@@ -31,10 +31,15 @@ jobs:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
-      # El Trusted Publishing por OIDC requiere npm >= 11.5.1, y Node 22 trae
+      # El Trusted Publishing por OIDC requiere npm >= 11.5.1 y Node 22 trae
       # una version anterior.
+      #
+      # Se fija el major en 12 en vez de usar `latest`. `latest` arrastra el
+      # proximo major sin aviso, y npm 12 ya trajo cambios que rompen
+      # (allowScripts, --allow-git y --allow-remote pasaron a opt-in). Es la
+      # misma razon por la que TypeScript esta fijado en ~6.0.3.
       - name: Actualizar npm
-        run: npm install -g npm@latest
+        run: npm install -g npm@12
 
       # Falla temprano y con un mensaje que se explica solo. Sin esto, la falta
       # de credenciales aparece recien al final como un ENEEDAUTH generico,
