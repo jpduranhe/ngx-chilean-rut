@@ -7,6 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "test:coverage": "ng test --configuration coverage",
     "pack": "cd dist/ngx-chilean-rut && npm pack",
     "publish": "cd dist/ngx-chilean-rut && npm publish",
     "fullbuild": "npm run build && npm run pack && npm run publish",
@@ -28,13 +29,14 @@
     "@angular/cli": "^22.1.2",
     "@angular/compiler-cli": "^22.1.0",
     "@eslint/js": "^10.0.1",
+    "@vitest/coverage-v8": "^4.1.10",
     "angular-eslint": "22.1.0",
     "eslint": "^10.6.0",
     "jsdom": "^27.4.0",
     "ng-packagr": "^22.1.0",
     "typescript": "~6.0.3",
     "typescript-eslint": "8.62.1",
-    "vitest": "^4.0.17",
+    "vitest": "^4.1.10",
     "zone.js": "~0.16.0"
   },
   "author": {

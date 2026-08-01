@@ -29,6 +29,24 @@
           "options": {
             "tsConfig": "projects/ngx-chilean-rut/tsconfig.spec.json",
             "runner": "vitest"
+          },
+          "configurations": {
+            "coverage": {
+              "coverage": true,
+              "coverageReporters": [
+                "text-summary",
+                "lcovonly"
+              ],
+              "coverageExclude": [
+                "**/*.spec.ts"
+              ],
+              "coverageThresholds": {
+                "statements": 95,
+                "branches": 90,
+                "functions": 95,
+                "lines": 95
+              }
+            }
           }
         },
         "lint": {
