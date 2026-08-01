@@ -36,6 +36,31 @@ jobs:
       - name: Actualizar npm
         run: npm install -g npm@latest
 
+      # Falla temprano y con un mensaje que se explica solo. Sin esto, la falta
+      # de credenciales aparece recien al final como un ENEEDAUTH generico,
+      # despues de haber corrido lint, tests y build para nada.
+      - name: Verificar credenciales de npm
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          echo "npm: $(npm --version)  ·  node: $(node --version)"
+          if [ -n "$NPM_TOKEN" ]; then
+            echo "Autenticacion: token (secret NPM_TOKEN presente)."
+            exit 0
+          fi
+          echo "Secret NPM_TOKEN ausente. Probando Trusted Publishing por OIDC..."
+          if npm whoami >/dev/null 2>&1; then
+            echo "Autenticacion: OIDC. Publicando como $(npm whoami)."
+            exit 0
+          fi
+          echo "::error::No hay credenciales de npm. Configura UNA de las dos:"
+          echo "::error::  A) Trusted Publishing (recomendado, sin secretos):"
+          echo "::error::     npmjs.com -> ngx-chilean-rut -> Settings -> Trusted Publisher"
+          echo "::error::     Repository: ${{ github.repository }}   Workflow: publish.yml"
+          echo "::error::  B) Token: crear un Automation token en npm y agregarlo"
+          echo "::error::     como secret NPM_TOKEN en este repositorio."
+          exit 1
+
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
