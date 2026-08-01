@@ -66,10 +66,13 @@ necesitas el valor sin puntos ni guion, usa `RutService.rutClean()`.
 
 ### Validador — Reactive Forms
 
+`rutValidator` es una `ValidatorFn` corriente: no necesita inyección ni
+contexto de injector, así que se usa en cualquier parte.
+
 ```typescript
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RutDirective, RutValidator } from 'ngx-chilean-rut';
+import { RutDirective, rutValidator } from 'ngx-chilean-rut';
 
 @Component({
   selector: 'app-root',
@@ -86,19 +89,39 @@ import { RutDirective, RutValidator } from 'ngx-chilean-rut';
   `,
 })
 export class AppComponent {
-  private readonly rutValidator = inject(RutValidator);
-
-  protected readonly rut = new FormControl('', [
-    Validators.required,
-    this.rutValidator.validate,
-  ]);
+  protected readonly rut = new FormControl('', [Validators.required, rutValidator]);
 }
 ```
 
 Cuando el RUT no pasa la validación, el control queda con el error
 `rutInvalid`.
 
-### Servicio — uso programático
+Si prefieres inyectar una dependencia — por ejemplo para sustituirla en un
+test — también existe la clase `RutValidator`, con el mismo comportamiento:
+
+```typescript
+private readonly validator = inject(RutValidator);
+protected readonly rut = new FormControl('', this.validator.validate);
+```
+
+### Funciones puras — sin Angular de por medio
+
+`cleanRut`, `formatRut` y `validateRut` no dependen de Angular ni de la
+inyección de dependencias. Sirven en un componente, en un guard, en Node o
+en un test sin `TestBed`.
+
+```typescript
+import { cleanRut, formatRut, validateRut } from 'ngx-chilean-rut';
+
+cleanRut('12.345.678-5');    // '123456785'
+formatRut('123456785');      // '12.345.678-5'
+validateRut('12.345.678-5'); // true
+validateRut('12.345.678-3'); // false
+validateRut(null);           // false — no lanza
+validateRut(123456785);      // true — acepta number
+```
+
+### Servicio — la misma API, inyectable
 
 ```typescript
 import { inject } from '@angular/core';
@@ -109,22 +132,27 @@ const rutService = inject(RutService);
 rutService.rutClean('12.345.678-5');    // '123456785'
 rutService.rutFormat('123456785');      // '12.345.678-5'
 rutService.rutValidate('12.345.678-5'); // true
-rutService.rutValidate('12.345.678-3'); // false
-rutService.rutValidate(null);           // false — no lanza
 ```
+
+`RutService` delega en las funciones puras. Usa la clase si necesitas
+inyección; usa las funciones si no.
 
 ## API
 
 | Símbolo                     | Descripción                                                         |
 | --------------------------- | ------------------------------------------------------------------- |
-| `RutService.rutClean(v)`    | Quita puntos, guion y ceros a la izquierda. Devuelve `string`.       |
-| `RutService.rutFormat(v)`   | Formatea como `12.345.678-5`. Devuelve `string`.                     |
-| `RutService.rutValidate(v)` | Valida con módulo 11. Devuelve `boolean`.                            |
+| `cleanRut(v)`               | Quita puntos, guion y ceros a la izquierda. Devuelve `string`.       |
+| `formatRut(v)`              | Formatea como `12.345.678-5`. Devuelve `string`.                     |
+| `validateRut(v)`            | Valida con módulo 11. Devuelve `boolean`.                            |
+| `rutValidator`              | `ValidatorFn` que marca el error `rutInvalid`. Sin DI.               |
 | `RutPipe`                   | Pipe `rut` para formatear en plantillas.                             |
 | `RutDirective`              | Formatea un `<input>` al escribir. Selectores `[ngxRut]` y `[rut]`.  |
-| `RutValidator.validate`     | `ValidatorFn` que marca el error `rutInvalid`.                       |
+| `RutService`                | Envoltorio inyectable de las funciones puras.                        |
+| `RutValidator.validate`     | Versión inyectable de `rutValidator`.                                |
 | `provideNgxRut()`           | Opcional. Solo para acotar instancias a un injector específico.      |
 | `RutInput`                  | `string \| number \| null \| undefined`.                             |
+
+Todas las funciones aceptan `RutInput` y ninguna lanza excepciones.
 
 ## Notas de la versión 1.0.0
 
@@ -144,14 +172,26 @@ Cambios que pueden afectarte al subir desde `0.0.x`:
 - `provideNgxRut()` ya no registra la directiva, porque las directivas no se
   resuelven por inyección de dependencias.
 
+Además, sin romper nada:
+
+- Se exportan las funciones puras `cleanRut`, `formatRut` y `validateRut`, que
+  funcionan sin Angular.
+- Se exporta `rutValidator`, una `ValidatorFn` que no necesita inyección.
+- La directiva conserva la posición del cursor al formatear.
+
 El selector legado `[rut]` sigue funcionando. `[ngxRut]` es el recomendado para
 código nuevo.
 
 ## Limitación conocida
 
-La directiva reescribe el valor del `<input>` en cada evento `input`, lo que
-mueve el cursor al final. Escribir al final del campo — el caso normal —
-funciona bien; editar en medio del texto reposiciona el cursor.
+La directiva conserva la posición del cursor al formatear: si editas en medio
+del RUT, el cursor se queda donde estaba, aunque el formateo haya insertado o
+quitado puntos.
+
+Queda un caso sin resolver, común a cualquier máscara de este tipo: borrar un
+separador — un punto o el guion — no hace nada visible, porque el formateo lo
+vuelve a insertar de inmediato. Para eliminar un dígito hay que pararse sobre
+el dígito.
 
 ## Licencia
 
