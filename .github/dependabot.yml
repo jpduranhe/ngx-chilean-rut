@@ -1,0 +1,47 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: build
+      include: scope
+    groups:
+      # Los paquetes de Angular se versionan juntos: actualizarlos por
+      # separado deja el árbol en un estado que no compila.
+      angular:
+        patterns:
+          - '@angular/*'
+          - '@angular-devkit/*'
+          - '@angular-eslint/*'
+          - angular-eslint
+          - ng-packagr
+      eslint:
+        patterns:
+          - eslint
+          - '@eslint/*'
+          - typescript-eslint
+      vitest:
+        patterns:
+          - vitest
+          - '@vitest/*'
+          - jsdom
+    ignore:
+      # TypeScript lo dicta el peerDependency de @angular/compiler-cli
+      # (>=6.0 <6.1). Dependabot no lo sabe y propondría 7.x, que rompe el
+      # build. Sube solo con el grupo de Angular.
+      - dependency-name: typescript
+        update-types:
+          - version-update:semver-major
+          - version-update:semver-minor
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci

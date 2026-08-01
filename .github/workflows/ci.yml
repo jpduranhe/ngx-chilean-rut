@@ -1,0 +1,58 @@
+name: CI
+
+# El gate de calidad corre donde sirve: antes de mergear.
+# publish.yml tambien lo corre, pero ahi ya es tarde para enterarse.
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# Un push nuevo a la misma rama cancela la corrida anterior.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Las dos lineas de Node que soporta Angular 22.
+        node-version: ['22.22.3', '24.15.0']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - name: Setup Node ${{ matrix.node-version }}
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test:coverage
+
+      - name: Build Library
+        run: npm run build
+
+      # Verifica que el paquete que llegaria a npm se puede empaquetar y que
+      # su contenido es el esperado. Barato, y atrapa errores de ng-package.
+      - name: Pack
+        run: npm pack --dry-run
+        working-directory: dist/ngx-chilean-rut

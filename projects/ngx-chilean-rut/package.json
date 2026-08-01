@@ -1,9 +1,17 @@
 {
   "name": "ngx-chilean-rut",
-  "version": "0.0.18",
+  "version": "1.0.0",
+  "description": "Validación y formateo de RUT chileno para Angular: servicio, pipe, directiva y validador de Reactive Forms.",
+  "keywords": [
+    "angular",
+    "rut",
+    "chile",
+    "validacion",
+    "reactive-forms"
+  ],
   "peerDependencies": {
-    "@angular/common": "^21.0.0",
-    "@angular/core": "^21.0.0"
+    "@angular/core": "^22.0.0",
+    "@angular/forms": "^22.0.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"

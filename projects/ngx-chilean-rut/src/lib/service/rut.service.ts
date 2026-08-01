@@ -1,54 +1,126 @@
 import { Injectable } from '@angular/core';
 
+/**
+ * Valor aceptado en la frontera pública de la librería.
+ *
+ * Los controles de formulario entregan `any`: un `<input type="number">` o un
+ * `setValue(12345678)` producen un `number`, y un control vacío produce `null`.
+ * El tipo refleja esa realidad en vez de mentir con `string`.
+ */
+export type RutInput = string | number | null | undefined;
 
+/**
+ * Largo mínimo de un RUT ya limpio: al menos un dígito de cuerpo más el
+ * dígito verificador. RUTs bajos como `1-9` o `999-7` son válidos.
+ */
+const MIN_LENGTH = 2;
+
+function normalize(value: RutInput): string | null {
+  if (typeof value === 'string') {
+    return value;
+  }
+  // Un número no puede transportar una `K`, pero sí un RUT numérico completo.
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return String(value);
+  }
+  return null;
+}
+
+/**
+ * Calcula el dígito verificador módulo 11 recorriendo el cuerpo como texto.
+ * Trabajar sobre el string evita el desbordamiento de precisión que produce
+ * convertir cuerpos largos a `number`.
+ */
+function checkDigit(body: string): string {
+  let sum = 0;
+  let multiplier = 2;
+  for (let i = body.length - 1; i >= 0; i--) {
+    sum += Number(body[i]) * multiplier;
+    multiplier = multiplier === 7 ? 2 : multiplier + 1;
+  }
+  const remainder = 11 - (sum % 11);
+  if (remainder === 11) {
+    return '0';
+  }
+  if (remainder === 10) {
+    return 'K';
+  }
+  return String(remainder);
+}
+
+/**
+ * Normaliza un RUT: deja solo dígitos y `K`, elimina ceros a la izquierda
+ * y pasa a mayúscula. Devuelve `''` si la entrada no es utilizable.
+ *
+ * Función pura, sin dependencia de Angular: sirve igual en el navegador,
+ * en Node o en un test sin `TestBed`.
+ */
+export function cleanRut(rut: RutInput): string {
+  const raw = normalize(rut);
+  if (raw === null) {
+    return '';
+  }
+  return raw
+    .replace(/[^0-9kK]+/g, '')
+    .replace(/^0+/, '')
+    .toUpperCase();
+}
+
+/**
+ * Valida un RUT chileno con el algoritmo módulo 11.
+ * Devuelve siempre `boolean`, nunca lanza.
+ *
+ * Función pura, sin dependencia de Angular.
+ */
+export function validateRut(rut: RutInput): boolean {
+  const cleaned = cleanRut(rut);
+  if (cleaned.length < MIN_LENGTH) {
+    return false;
+  }
+  const body = cleaned.slice(0, -1);
+  // La `K` solo es válida como dígito verificador, nunca dentro del cuerpo.
+  if (!/^\d+$/.test(body)) {
+    return false;
+  }
+  return checkDigit(body) === cleaned.slice(-1);
+}
+
+/**
+ * Formatea un RUT como `12.345.678-5`.
+ * Devuelve siempre `string`, nunca lanza.
+ *
+ * Función pura, sin dependencia de Angular.
+ */
+export function formatRut(rut: RutInput): string {
+  const cleaned = cleanRut(rut);
+  if (cleaned.length <= 1) {
+    return cleaned;
+  }
+  let result = `${cleaned.slice(-4, -1)}-${cleaned.slice(-1)}`;
+  for (let i = 4; i < cleaned.length; i += 3) {
+    result = `${cleaned.slice(-3 - i, -i)}.${result}`;
+  }
+  return result;
+}
+
+/**
+ * Envoltorio inyectable sobre las funciones puras de RUT.
+ *
+ * Existe para quienes prefieren inyectar una dependencia (y poder
+ * sustituirla en tests). Si no necesitas inyección, usa directamente
+ * `cleanRut`, `formatRut` y `validateRut`.
+ */
+@Injectable({ providedIn: 'root' })
 export class RutService {
-
-  /**
-   * Clean a Chilean RUT
-   * @param rut
-   */
-  public  rutClean(rut: string) {
-    return rut
-      .replace(/[^0-9kK]+/g, '')
-      .replace(/^0+/, '')
-      .toUpperCase();
+  public rutClean(rut: RutInput): string {
+    return cleanRut(rut);
   }
 
-  /**
-   * Validate a Chilean RUT
-   * @param rut
-   */
-  public  rutValidate(rut: string) {
-   if (!rut || rut == null) return '';
-    const _rut: string = this.rutClean(rut);
-    if(_rut.length < 6 ) return false;
-    let rutDigits: number = parseInt(_rut.slice(0, -1), 10);
-    let m: number = 0;
-    let s: number = 1;
-
-    while (rutDigits > 0) {
-      s = (s + rutDigits % 10 * (9 - m++ % 6)) % 11;
-      rutDigits = Math.floor(rutDigits / 10);
-    }
-    const checkDigit: string = (s > 0) ? String((s - 1)) : 'K';
-    return (checkDigit === _rut.slice(-1));
+  public rutValidate(rut: RutInput): boolean {
+    return validateRut(rut);
   }
 
-  /**
-   * Format a Chilean RUT
-   * @param rut
-   * @returns {string}
-   */
-  public  rutFormat(rut: string): string {
-    if (!rut || rut == null) return '';
-    const _rut: string = this.rutClean(rut);
-    if (_rut.length <= 1) {
-      return _rut;
-    }
-    let result: string = `${_rut.slice(-4, -1)}-${_rut.substring(_rut.length - 1)}`;
-    for (let i: number = 4; i < _rut.length; i += 3) {
-      result = `${_rut.slice(-3 - i, -i)}.${result}`;
-    }
-    return result;
+  public rutFormat(rut: RutInput): string {
+    return formatRut(rut);
   }
 }

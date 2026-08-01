@@ -7,10 +7,10 @@
       "projectType": "library",
       "root": "projects/ngx-chilean-rut",
       "sourceRoot": "projects/ngx-chilean-rut/src",
-      "prefix": "lib",
+      "prefix": "ngx",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular/build:ng-packagr",
           "options": {
             "project": "projects/ngx-chilean-rut/ng-package.json"
           },
@@ -25,16 +25,46 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "projects/ngx-chilean-rut/tsconfig.spec.json",
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ]
+            "runner": "vitest"
+          },
+          "configurations": {
+            "coverage": {
+              "coverage": true,
+              "coverageReporters": [
+                "text-summary",
+                "lcovonly"
+              ],
+              "coverageExclude": [
+                "**/*.spec.ts"
+              ],
+              "coverageThresholds": {
+                "statements": 95,
+                "branches": 90,
+                "functions": 95,
+                "lines": 95
+              }
+            }
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "projects/ngx-chilean-rut/**/*.ts",
+              "projects/ngx-chilean-rut/**/*.html"
+            ],
+            "eslintConfig": "projects/ngx-chilean-rut/eslint.config.js"
           }
         }
       }
     }
+  },
+  "cli": {
+    "schematicCollections": [
+      "angular-eslint"
+    ]
   }
 }
