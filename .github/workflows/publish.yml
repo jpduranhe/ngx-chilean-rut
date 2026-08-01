@@ -19,9 +19,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -31,6 +31,14 @@ jobs:
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
+
+      # Gate de calidad: si el lint o los tests fallan, NO se publica.
+      # Sin esto, una suite roja llega a npm sin que nadie se entere.
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
 
       - name: Build Library
         run: npm run build
