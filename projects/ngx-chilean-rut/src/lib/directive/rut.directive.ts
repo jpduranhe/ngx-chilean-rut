@@ -1,7 +1,8 @@
 import { Directive, ElementRef, forwardRef, inject, Renderer2 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-import { RutInput, RutService } from '../service/rut.service';
+import { formatRut, RutInput, RutService } from '../service/rut.service';
+import { countSignificantChars, indexAfterSignificantChars } from './caret';
 
 type OnChangeFn = (value: string) => void;
 type OnTouchedFn = () => void;
@@ -50,9 +51,29 @@ export class RutDirective implements ControlValueAccessor {
     this.render(this.rutService.rutClean(this.currentValue));
   }
 
-  /** Formatea a medida que se escribe y propaga el valor al formulario. */
+  /**
+   * Formatea a medida que se escribe, conservando la posición del cursor.
+   *
+   * Reescribir el `value` mueve el cursor al final, así que hay que
+   * reubicarlo. La posición absoluta no sirve como referencia porque al
+   * insertar puntos y guion se corre; lo que se mantiene estable es cuántos
+   * caracteres significativos quedan a la izquierda del cursor.
+   */
   public onInput(): void {
-    this.propagate(this.rutService.rutFormat(this.currentValue));
+    const element = this.element.nativeElement;
+    const previousValue = element.value;
+    const caret = element.selectionStart;
+    const formatted = formatRut(previousValue);
+
+    this.propagate(formatted);
+
+    // `selectionStart` es null en inputs que no soportan selección
+    // (por ejemplo `type="number"`); ahí no hay cursor que reubicar.
+    if (caret !== null) {
+      const significant = countSignificantChars(previousValue, caret);
+      const position = indexAfterSignificantChars(formatted, significant);
+      element.setSelectionRange(position, position);
+    }
   }
 
   /** Formatea al salir del campo y marca el control como tocado. */

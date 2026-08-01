@@ -104,4 +104,41 @@ describe('RutDirective', () => {
       expect(input.disabled).toBe(true);
     });
   });
+
+  describe('posición del cursor al formatear', () => {
+    let fixture: ComponentFixture<PlainHostComponent>;
+    let input: HTMLInputElement;
+
+    beforeEach(() => {
+      fixture = TestBed.createComponent(PlainHostComponent);
+      fixture.detectChanges();
+      input = inputOf(fixture);
+    });
+
+    function type(value: string, caret: number): number | null {
+      input.value = value;
+      input.setSelectionRange(caret, caret);
+      input.dispatchEvent(new Event('input'));
+      return input.selectionStart;
+    }
+
+    it('deja el cursor al final cuando se escribe al final', () => {
+      // '1234' → '123-4': el cursor estaba tras 4 significativos.
+      expect(type('1234', 4)).toEqual('123-4'.length);
+    });
+
+    it('conserva el cursor al escribir en medio del texto', () => {
+      // '12345678' con el cursor tras el 4º dígito. Al formatear a
+      // '1.234.567-8' el cursor debe seguir tras ese mismo dígito.
+      const position = type('12345678', 4);
+
+      expect(input.value).toEqual('1.234.567-8');
+      expect(position).toEqual(5);
+      expect(input.value.slice(0, position ?? 0)).toEqual('1.234');
+    });
+
+    it('mantiene el cursor al inicio', () => {
+      expect(type('12345678', 0)).toEqual(0);
+    });
+  });
 });
