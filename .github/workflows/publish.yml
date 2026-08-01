@@ -41,30 +41,29 @@ jobs:
       - name: Actualizar npm
         run: npm install -g npm@12
 
-      # Falla temprano y con un mensaje que se explica solo. Sin esto, la falta
-      # de credenciales aparece recien al final como un ENEEDAUTH generico,
-      # despues de haber corrido lint, tests y build para nada.
-      - name: Verificar credenciales de npm
+      # Deja registrado el contexto de autenticacion para que, si el publish
+      # falla, la causa se lea de inmediato sin abrir el log crudo.
+      #
+      # NO decide si hay credenciales validas: el intercambio del token OIDC
+      # ocurre dentro de `npm publish`, no en comandos como `npm whoami`, asi
+      # que cualquier chequeo previo da un falso negativo con Trusted
+      # Publishing correctamente configurado. La autoridad es `npm publish`.
+      - name: Contexto de autenticacion
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           echo "npm: $(npm --version)  ·  node: $(node --version)"
+          echo "El OIDC requiere npm >= 11.5.1."
           if [ -n "$NPM_TOKEN" ]; then
-            echo "Autenticacion: token (secret NPM_TOKEN presente)."
-            exit 0
+            echo "Metodo previsto: token (secret NPM_TOKEN presente)."
+          else
+            echo "Metodo previsto: Trusted Publishing por OIDC (sin secret NPM_TOKEN)."
+            echo "Si el publish termina en ENEEDAUTH, revisa en npmjs.com que el"
+            echo "Trusted Publisher apunte exactamente a:"
+            echo "  Repository: ${{ github.repository }}"
+            echo "  Workflow:   publish.yml"
+            echo "  Environment: (vacio)"
           fi
-          echo "Secret NPM_TOKEN ausente. Probando Trusted Publishing por OIDC..."
-          if npm whoami >/dev/null 2>&1; then
-            echo "Autenticacion: OIDC. Publicando como $(npm whoami)."
-            exit 0
-          fi
-          echo "::error::No hay credenciales de npm. Configura UNA de las dos:"
-          echo "::error::  A) Trusted Publishing (recomendado, sin secretos):"
-          echo "::error::     npmjs.com -> ngx-chilean-rut -> Settings -> Trusted Publisher"
-          echo "::error::     Repository: ${{ github.repository }}   Workflow: publish.yml"
-          echo "::error::  B) Token: crear un Automation token en npm y agregarlo"
-          echo "::error::     como secret NPM_TOKEN en este repositorio."
-          exit 1
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
