@@ -74,12 +74,34 @@ describe('RutDirective', () => {
       expect(input.value).toEqual('12.345.678-5');
     });
 
-    it('propaga al control el valor formateado, sin desincronizarse del input', () => {
+    it('muestra el RUT formateado pero propaga al control el valor limpio', () => {
       input.value = '123456789';
       input.dispatchEvent(new Event('input'));
 
       expect(input.value).toEqual('12.345.678-9');
-      expect(component.control.value).toEqual('12.345.678-9');
+      expect(component.control.value).toEqual('123456789');
+    });
+
+    it('propaga limpio aunque se escriba con puntos y guion', () => {
+      input.value = '12.345.678-9';
+      input.dispatchEvent(new Event('input'));
+
+      expect(component.control.value).toEqual('123456789');
+    });
+
+    it('propaga el valor limpio tambien al salir del campo', () => {
+      input.value = '12.345.678-9';
+      input.dispatchEvent(new Event('blur'));
+
+      expect(input.value).toEqual('12.345.678-9');
+      expect(component.control.value).toEqual('123456789');
+    });
+
+    it('deja el control vacio cuando se borra el input', () => {
+      input.value = '';
+      input.dispatchEvent(new Event('input'));
+
+      expect(component.control.value).toEqual('');
     });
 
     it('refleja en el input los cambios que vienen del formulario', () => {

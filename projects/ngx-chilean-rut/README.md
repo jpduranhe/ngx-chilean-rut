@@ -49,20 +49,33 @@ formulario nunca se desincronizan.
 ```typescript
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RutDirective } from 'ngx-chilean-rut';
+import { RutDirective, RutPipe } from 'ngx-chilean-rut';
 
 @Component({
   selector: 'app-root',
-  imports: [RutDirective, FormsModule],
-  template: `<input type="text" ngxRut [(ngModel)]="rut" />`,
+  imports: [RutDirective, RutPipe, FormsModule],
+  template: `
+    <input type="text" ngxRut [(ngModel)]="rut" />
+    <p>Modelo: {{ rut }}</p>
+    <p>Formateado: {{ rut | rut }}</p>
+  `,
 })
 export class AppComponent {
   protected rut = '';
 }
 ```
 
-El valor que llega al modelo es el RUT **formateado** (`12.345.678-5`). Si
-necesitas el valor sin puntos ni guion, usa `RutService.rutClean()`.
+**La vista y el modelo guardan cosas distintas, a propósito.** Es justamente
+para eso que existe `ControlValueAccessor`:
+
+| Dónde                  | Valor           |
+| ---------------------- | --------------- |
+| El `<input>` muestra   | `12.345.678-5`  |
+| El modelo recibe       | `123456785`     |
+
+Al formulario llega el valor canónico y limpio, que es el que conviene enviar
+a una API y persistir. Para mostrarlo formateado en otra parte, usa el pipe
+`rut` o la función `formatRut()`.
 
 ### Validador — Reactive Forms
 
@@ -161,6 +174,10 @@ Cambios que pueden afectarte al subir desde `0.0.x`:
 - **Requiere Angular 22.** Las versiones `0.0.x` soportan Angular 21.
 - La directiva ahora implementa `ControlValueAccessor`. Si usabas `[(ngModel)]`
   o `formControlName`, el modelo y el input dejan de desincronizarse.
+- **El modelo recibe el RUT limpio (`123456785`), no el formateado.** Antes el
+  valor del modelo dependía de lo que quedara en el DOM. Si tu backend espera
+  el RUT con puntos y guion, formatéalo al enviar con `formatRut()`. La
+  validación acepta ambas formas, así que tus validadores no cambian.
 - El selector se restringe a elementos `<input>`. Aplicarlo a otro elemento
   antes no hacía nada útil.
 - `rutValidate()` devuelve siempre `boolean`. Antes devolvía `''` para entradas

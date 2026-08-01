@@ -1,7 +1,7 @@
 import { Directive, ElementRef, forwardRef, inject, Renderer2 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-import { formatRut, RutInput, RutService } from '../service/rut.service';
+import { cleanRut, formatRut, RutInput, RutService } from '../service/rut.service';
 import { countSignificantChars, indexAfterSignificantChars } from './caret';
 
 type OnChangeFn = (value: string) => void;
@@ -14,9 +14,10 @@ type OnTouchedFn = () => void;
  * formulario nunca se desincronizan: funciona igual con `[(ngModel)]`, con
  * `formControlName` o sin formulario alguno.
  *
- * El valor propagado al formulario es el RUT **formateado** (`12.345.678-5`),
- * igual que en versiones anteriores. Usa `RutService.rutClean()` si necesitas
- * el valor sin puntos ni guion.
+ * Separa vista y modelo, que es para lo que existe `ControlValueAccessor`:
+ * el `<input>` muestra el RUT **formateado** (`12.345.678-5`) y al formulario
+ * llega el valor **canónico y limpio** (`123456785`), que es el que conviene
+ * enviar y persistir. Usa `formatRut()` si necesitas mostrarlo en otra parte.
  *
  * El selector `[rut]` se mantiene por compatibilidad; `[ngxRut]` es el
  * prefijado y el recomendado para código nuevo.
@@ -111,8 +112,12 @@ export class RutDirective implements ControlValueAccessor {
     this.renderer.setProperty(this.element.nativeElement, 'value', value);
   }
 
-  private propagate(value: string): void {
-    this.render(value);
-    this.notifyChange(value);
+  /**
+   * Muestra el RUT formateado y propaga al formulario el valor limpio.
+   * La vista y el modelo cambian siempre en el mismo paso.
+   */
+  private propagate(formatted: string): void {
+    this.render(formatted);
+    this.notifyChange(cleanRut(formatted));
   }
 }
