@@ -1,13 +1,17 @@
-import {inject} from "@angular/core";
-import {RutService} from "../service/rut.service";
-import {AbstractControl, ValidatorFn} from "@angular/forms";
+import { inject, Injectable } from '@angular/core';
+import { AbstractControl, ValidationErrors } from '@angular/forms';
 
+import { RutService } from '../service/rut.service';
 
+@Injectable({ providedIn: 'root' })
 export class RutValidator {
-  private rutService= inject(RutService) ;
+  private readonly rutService = inject(RutService);
 
-   validate= (control: AbstractControl): { [key: string]: any } | null => {
-    return this.rutService.rutValidate(control.value)  ? null : { rutInvalid: true };
-  };
+  /**
+   * Validador para Reactive Forms. Marca el control con `rutInvalid`
+   * cuando el RUT no supera la validación módulo 11.
+   */
+  public readonly validate = (control: AbstractControl): ValidationErrors | null =>
+    this.rutService.rutValidate(control.value) ? null : { rutInvalid: true };
 }
 
