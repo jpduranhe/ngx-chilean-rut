@@ -1,8 +1,10 @@
 name: Publish to NPM
 
+# Un solo disparador automatico: el tag. Antes tambien escuchaba
+# `release: created`, y como un release de GitHub se crea a partir de un tag,
+# ambos eventos disparaban la misma publicacion. La segunda siempre falla,
+# porque npm no permite republicar una version ya existente.
 on:
-  release:
-    types: [created]
   push:
     tags:
       - 'v*'
